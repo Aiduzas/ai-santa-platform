@@ -1,54 +1,63 @@
+// pages/index.tsx
 import { useState } from 'react';
 
 export default function Home() {
-  const [userInput, setUserInput] = useState('');
-  const [santaResponse, setSantaResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState('');
+  const [response, setResponse] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSend = async () => {
-    if (!userInput.trim()) return;
-    setLoading(true);
-    setSantaResponse('Kalėdų Senelis jau kalba!');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResponse('');
+    setError('');
+    setAudioUrl('');
 
     try {
-      const response = await fetch('/api/santa', {
+      const res = await fetch('/api/santa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: userInput }),
+        body: JSON.stringify({ message: input }),
       });
 
-      const data = await response.json();
-      console.log('Audio URL:', data.audioUrl);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
-      const audio = new Audio(data.audioUrl);
-      await audio.play();
-
-      setSantaResponse('✔️ Kalėdų Senelio atsakymas paleistas!');
-    } catch (error) {
-      console.error('Klaida siunčiant žinutę:', error);
-      setSantaResponse('❌ Klaida! Nepavyko paleisti garso.');
+      const data = await res.json();
+      setResponse('Kalėdų Senelis jau kalba!');
+      setAudioUrl(data.audioUrl);
+    } catch (err) {
+      console.error('Klaida siunčiant žinutę:', err);
+      setError('❌ Klaida! Nepavyko paleisti garso.');
     }
-
-    setLoading(false);
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+    <div style={{ padding: '2rem' }}>
       <h1>🎅 Pasikalbėk su Kalėdų Seneliu</h1>
-      <textarea
-        rows={3}
-        value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        style={{ width: '300px' }}
-      />
-      <br />
-      <button onClick={handleSend} disabled={loading}>
-        Siųsti
-      </button>
-      <p><strong>Senelis:</strong></p>
-      <p>{santaResponse}</p>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={2}
+          cols={40}
+        />
+        <br />
+        <button type="submit">Sižsti</button>
+      </form>
+      <div style={{ marginTop: '1rem' }}>
+        <strong>Senelis:</strong>
+        <p>{response}</p>
+        {audioUrl && (
+          <audio controls autoPlay src={audioUrl}></audio>
+        )}
+        {error && (
+          <p style={{ color: 'red' }}>{error}</p>
+        )}
+      </div>
     </div>
   );
 }
