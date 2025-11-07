@@ -17,6 +17,7 @@ export default function Home() {
     });
     const data = await res.json();
     setResponse(data.reply || "Atsiprašau, įvyko klaida.");
+console.log("Audio URL:", data.audioUrl);
     setAudioUrl(data.audioUrl || "");
     setLoading(false);
   };
