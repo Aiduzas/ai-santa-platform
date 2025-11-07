@@ -1,7 +1,4 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -23,18 +20,22 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-red-50 flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl font-bold mb-4">🎅 Pasikalbėk su Kalėdų Seneliu</h1>
-      <Textarea
+      <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Parašyk savo klausimą..."
-        rows={3}
-        className="w-full max-w-xl mb-2"
+        rows={4}
+        className="w-full max-w-xl p-2 border border-gray-300 rounded mb-4"
       />
-      <Button onClick={handleSend} disabled={loading}>
+      <button
+        onClick={handleSend}
+        disabled={loading}
+        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded"
+      >
         {loading ? "Kalėdų Senelis galvoja..." : "Siųsti"}
-      </Button>
+      </button>
       {response && (
-        <div className="mt-4 bg-white p-4 rounded shadow w-full max-w-xl">
+        <div className="mt-6 bg-white p-4 rounded shadow w-full max-w-xl">
           <strong>Senelis:</strong>
           <p>{response}</p>
         </div>
