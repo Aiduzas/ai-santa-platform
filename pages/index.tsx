@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleSend = async () => {
     setLoading(true);
+    setAudioUrl(""); // Reset previous audio
     const res = await fetch("/api/santa-chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -14,8 +17,17 @@ export default function Home() {
     });
     const data = await res.json();
     setResponse(data.reply || "Atsiprašau, įvyko klaida.");
+    setAudioUrl(data.audioUrl || "");
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play().catch((err) => {
+        console.error("Klaida paleidžiant garsą:", err);
+      });
+    }
+  }, [audioUrl]);
 
   return (
     <main className="min-h-screen bg-red-50 flex flex-col items-center justify-center p-4">
@@ -34,11 +46,19 @@ export default function Home() {
       >
         {loading ? "Kalėdų Senelis galvoja..." : "Siųsti"}
       </button>
+
       {response && (
         <div className="mt-6 bg-white p-4 rounded shadow w-full max-w-xl">
           <strong>Senelis:</strong>
           <p>{response}</p>
         </div>
+      )}
+
+      {audioUrl && (
+        <audio ref={audioRef} controls autoPlay className="mt-4">
+          <source src={audioUrl} type="audio/mpeg" />
+          Jūsų naršyklė nepalaiko garso atkūrimo.
+        </audio>
       )}
     </main>
   );
